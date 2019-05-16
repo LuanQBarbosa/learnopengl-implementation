@@ -3,9 +3,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-// window resize callback function
+void processInput( GLFWwindow* );
 void framebuffer_size_callback( GLFWwindow*, int, int );
 
+// settings
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -42,14 +43,26 @@ int main()
 
     // setting the size of the rendering window
     glViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    // passing to GLFW the window resize callback function
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
+    // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
     {
+        // input processing
+        processInput( window );
+
+        // rendering commands
+        glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
+        glClear( GL_COLOR_BUFFER_BIT );
+
+        // check call events and swap buffer
         glfwSwapBuffers( window );
         glfwPollEvents( );
     }
   
+    // clean up GLFW's allocated resources
     glfwTerminate( );
     return 0;
 }
@@ -58,4 +71,13 @@ int main()
 void framebuffer_size_callback( GLFWwindow* window, int width, int height )
 {
     glViewport( 0, 0, width, height );
+}
+
+// processes the given inputs
+void processInput( GLFWwindow* window )
+{
+    if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose( window, true );
+    }
 }
