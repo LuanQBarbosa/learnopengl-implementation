@@ -18,6 +18,13 @@ const char *vertexShaderSource = "#version 330 core\n"
                                  "      gl_Position = vec4( aPos.x, aPos.y, aPos.z, 1.0f );\n"
                                  "}\n\0";
 
+const char *fragmentShaderSource = "#version 330 core\n"
+                                   "out vec4 FragColor;\n"
+                                   "void main( )\n"
+                                   "{\n"
+                                   "      FragColor = vec4( 1.0f, 0.5f, 0.2f, 1.0f );\n"
+                                   "}\n\0";
+
 int main()
 {
     // initialize GLFW
@@ -79,6 +86,14 @@ int main()
     // attaching the shader source code with the created shader object and compiling
     glShaderSource( vertexShader, 1, &vertexShaderSource, NULL );
     glCompileShader( vertexShader );
+
+    // creating a shader object to reference a fragment shader
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
+
+    // attaching the shader source code with the created shader object and compiling
+    glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
+    glCompileShader( fragmentShader );
 
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
