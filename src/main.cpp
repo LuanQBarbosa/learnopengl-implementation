@@ -10,6 +10,14 @@ void framebuffer_size_callback( GLFWwindow*, int, int );
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
+// simple Vertex Shader source code
+const char *vertexShaderSource = "#version 330 core\n"
+                                 "layout ( location = 0 ) in vec3 aPos;\n"
+                                 "void main( )\n"
+                                 "{\n"
+                                 "      gl_Position = vec4( aPos.x, aPos.y, aPos.z, 1.0f );\n"
+                                 "}\n\0";
+
 int main()
 {
     // initialize GLFW
@@ -63,6 +71,14 @@ int main()
 
     // copying the previourly defined vertex data into the buffer's memory
     glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
+
+    // creating a shader object to reference a vertex shader
+    unsigned int vertexShader;
+    vertexShader = glCreateShader( GL_VERTEX_SHADER );
+
+    // attaching the shader source code with the created shader object and compiling
+    glShaderSource( vertexShader, 1, &vertexShaderSource, NULL );
+    glCompileShader( vertexShader );
 
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
