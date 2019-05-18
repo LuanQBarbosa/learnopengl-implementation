@@ -47,6 +47,23 @@ int main()
     // passing to GLFW the window resize callback function
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
+    // triangle vertices in normalized device coordinates
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f
+    };
+
+    // generating a Vertex Buffer Object to be able to send the vertices data do the GPU
+    unsigned int VBO;
+    glGenBuffers( 1, &VBO );
+
+    // binding the newly generated buffer with the GL_ARRAY_BUFFER of OpenGL
+    glBindBuffer( GL_ARRAY_BUFFER, VBO );
+
+    // copying the previourly defined vertex data into the buffer's memory
+    glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
+
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
     {
