@@ -95,6 +95,22 @@ int main()
     glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
     glCompileShader( fragmentShader );
 
+    // creating the Shader Program
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram( );
+
+    // attaching previously compiled shaders to the Shader Program and linking them
+    glAttachShader( shaderProgram, vertexShader );
+    glAttachShader( shaderProgram, fragmentShader );
+    glLinkProgram( shaderProgram );
+
+    // activating the Shader Program
+    glUseProgram( shaderProgram );
+
+    // deleting created and now unnecessary shaders
+    glDeleteShader( vertexShader );
+    glDeleteShader( fragmentShader );
+
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
     {
