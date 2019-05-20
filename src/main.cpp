@@ -73,7 +73,14 @@ int main()
     unsigned int VBO;
     glGenBuffers( 1, &VBO );
 
-    // binding the newly generated buffer with the GL_ARRAY_BUFFER of OpenGL
+    // generating a Vertex Array Object to store the states that were set
+    unsigned int VAO;
+    glGenVertexArrays( 1, &VAO );
+
+    // biding the Vertex Array Object
+    glBindVertexArray( VAO );
+
+    // binding the newly generated Vertex Buffer Object with the GL_ARRAY_BUFFER of OpenGL
     glBindBuffer( GL_ARRAY_BUFFER, VBO );
 
     // copying the previourly defined vertex data into the buffer's memory
@@ -102,14 +109,15 @@ int main()
     // attaching previously compiled shaders to the Shader Program and linking them
     glAttachShader( shaderProgram, vertexShader );
     glAttachShader( shaderProgram, fragmentShader );
-    glLinkProgram( shaderProgram );
-
-    // activating the Shader Program
-    glUseProgram( shaderProgram );
+    glLinkProgram( shaderProgram );    
 
     // deleting created and now unnecessary shaders
     glDeleteShader( vertexShader );
     glDeleteShader( fragmentShader );
+
+    // teaching OpenGL how it should interpret the Vertex Data
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0 );
+    glEnableVertexAttribArray( 0 );
 
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
@@ -121,6 +129,11 @@ int main()
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
         glClear( GL_COLOR_BUFFER_BIT );
 
+        // activating the Shader Program
+        glUseProgram( shaderProgram );
+        glBindVertexArray( VAO );
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
+        
         // check call events and swap buffer
         glfwSwapBuffers( window );
         glfwPollEvents( );
