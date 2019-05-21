@@ -25,21 +25,19 @@ const char *fragmentShaderSource = "#version 330 core\n"
                                    "      FragColor = vec4( 1.0f, 0.5f, 0.2f, 1.0f );\n"
                                    "}\n\0";
 
-int main()
+int main( )
 {
     // initialize GLFW
     glfwInit( );
-
     // configure OpenGL's minor and major versions to be 3.3
     glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
     glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-
     // configure GLFW to use only the core-profile
     glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
     // creating a window object to hold windowing data
     GLFWwindow* window = glfwCreateWindow( SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL );
-    if ( window == NULL)
+    if ( window == NULL )
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate( );
@@ -48,6 +46,8 @@ int main()
 
     // make the newly created window the main context of the current thread
     glfwMakeContextCurrent( window );
+    // passing to GLFW the window resize callback function
+    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
     // initializing GLAD
     if ( !gladLoadGLLoader( (GLADloadproc)glfwGetProcAddress ) )
@@ -57,10 +57,33 @@ int main()
     }
 
     // setting the size of the rendering window
-    glViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
+    glViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );   
 
-    // passing to GLFW the window resize callback function
-    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
+    // creating a shader object to reference a vertex shader
+    unsigned int vertexShader;
+    vertexShader = glCreateShader( GL_VERTEX_SHADER );
+    // attaching the shader source code with the created shader object and compiling
+    glShaderSource( vertexShader, 1, &vertexShaderSource, NULL );
+    glCompileShader( vertexShader );
+
+    // creating a shader object to reference a fragment shader
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
+    // attaching the shader source code with the created shader object and compiling
+    glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
+    glCompileShader( fragmentShader );
+
+    // creating the Shader Program
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram( );
+    // attaching previously compiled shaders to the Shader Program and linking them
+    glAttachShader( shaderProgram, vertexShader );
+    glAttachShader( shaderProgram, fragmentShader );
+    glLinkProgram( shaderProgram );    
+
+    // deleting created and now unnecessary shaders
+    glDeleteShader( vertexShader );
+    glDeleteShader( fragmentShader );   
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
@@ -69,55 +92,26 @@ int main()
          0.0f,  0.5f, 0.0f
     };
 
+    // generating a Vertex Array Object to store the states that were set
+    unsigned int VAO;
+    glGenVertexArrays( 1, &VAO );
     // generating a Vertex Buffer Object to be able to send the vertices data do the GPU
     unsigned int VBO;
     glGenBuffers( 1, &VBO );
 
-    // generating a Vertex Array Object to store the states that were set
-    unsigned int VAO;
-    glGenVertexArrays( 1, &VAO );
-
-    // biding the Vertex Array Object
+    // biding the Vertex Array Object (first)
     glBindVertexArray( VAO );
-
-    // binding the newly generated Vertex Buffer Object with the GL_ARRAY_BUFFER of OpenGL
+    // binding the newly generated Vertex Buffer Object with the GL_ARRAY_BUFFER of OpenGL (second)
     glBindBuffer( GL_ARRAY_BUFFER, VBO );
-
-    // copying the previourly defined vertex data into the buffer's memory
+    // copying the previourly defined vertex data into the buffer's memory (third)
     glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
-
-    // creating a shader object to reference a vertex shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader( GL_VERTEX_SHADER );
-
-    // attaching the shader source code with the created shader object and compiling
-    glShaderSource( vertexShader, 1, &vertexShaderSource, NULL );
-    glCompileShader( vertexShader );
-
-    // creating a shader object to reference a fragment shader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
-
-    // attaching the shader source code with the created shader object and compiling
-    glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
-    glCompileShader( fragmentShader );
-
-    // creating the Shader Program
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram( );
-
-    // attaching previously compiled shaders to the Shader Program and linking them
-    glAttachShader( shaderProgram, vertexShader );
-    glAttachShader( shaderProgram, fragmentShader );
-    glLinkProgram( shaderProgram );    
-
-    // deleting created and now unnecessary shaders
-    glDeleteShader( vertexShader );
-    glDeleteShader( fragmentShader );
-
-    // teaching OpenGL how it should interpret the Vertex Data
+    // teaching OpenGL how it should interpret the Vertex Data (fourth)
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0 );
     glEnableVertexAttribArray( 0 );
+    // unbiding the current Vertex Buffer Object
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    // unbiding the current Vertex Array Object
+    glBindVertexArray( 0 );
 
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
@@ -127,9 +121,9 @@ int main()
 
         // rendering commands
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
-        glClear( GL_COLOR_BUFFER_BIT );
+        glClear( GL_COLOR_BUFFER_BIT ); 
 
-        // activating the Shader Program
+        // activating the Shader Program, biding the Vertex Array Object and (finally) drawing the triangle
         glUseProgram( shaderProgram );
         glBindVertexArray( VAO );
         glDrawArrays( GL_TRIANGLES, 0, 3 );
@@ -138,6 +132,10 @@ int main()
         glfwSwapBuffers( window );
         glfwPollEvents( );
     }
+
+    // deallocating all the used resources
+    glDeleteVertexArrays( 1, &VAO );
+    glDeleteBuffers( 1, &VBO );
   
     // clean up GLFW's allocated resources
     glfwTerminate( );
