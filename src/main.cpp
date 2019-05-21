@@ -56,9 +56,6 @@ int main( )
         return -1;
     }
 
-    // setting the size of the rendering window
-    glViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );   
-
     // creating a shader object to reference a vertex shader
     unsigned int vertexShader;
     vertexShader = glCreateShader( GL_VERTEX_SHADER );
@@ -87,9 +84,14 @@ int main( )
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+         0.5f,  0.5f, 0.0f, // top right
+         0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f  // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3,    // first triangle
+        1, 2, 3     // second triangle
     };
 
     // generating a Vertex Array Object to store the states that were set
@@ -98,6 +100,9 @@ int main( )
     // generating a Vertex Buffer Object to be able to send the vertices data do the GPU
     unsigned int VBO;
     glGenBuffers( 1, &VBO );
+    // generating a Element Buffer Object to store the vertex indices to be part of a specified triangle
+    unsigned int EBO;
+    glGenBuffers( 1, &EBO );
 
     // biding the Vertex Array Object (first)
     glBindVertexArray( VAO );
@@ -105,6 +110,10 @@ int main( )
     glBindBuffer( GL_ARRAY_BUFFER, VBO );
     // copying the previourly defined vertex data into the buffer's memory (third)
     glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
+    // binding the newly generated Element Buffer Object with the GL_ELEMENT_ARRAY_BUFFER of OpenGL
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
+    // copying the previously defined index data into the buffer's memory
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
     // teaching OpenGL how it should interpret the Vertex Data (fourth)
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0 );
     glEnableVertexAttribArray( 0 );
@@ -126,7 +135,8 @@ int main( )
         // activating the Shader Program, biding the Vertex Array Object and (finally) drawing the triangle
         glUseProgram( shaderProgram );
         glBindVertexArray( VAO );
-        glDrawArrays( GL_TRIANGLES, 0, 3 );
+        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // glDrawArrays( GL_TRIANGLES, 0, 3 );
         
         // check call events and swap buffer
         glfwSwapBuffers( window );
@@ -136,6 +146,7 @@ int main( )
     // deallocating all the used resources
     glDeleteVertexArrays( 1, &VAO );
     glDeleteBuffers( 1, &VBO );
+    glDeleteBuffers( 1, &EBO );
   
     // clean up GLFW's allocated resources
     glfwTerminate( );
@@ -145,6 +156,7 @@ int main( )
 // window resize callback function implementation
 void framebuffer_size_callback( GLFWwindow* window, int width, int height )
 {
+    // setting the size of the rendering window
     glViewport( 0, 0, width, height );
 }
 
@@ -154,5 +166,17 @@ void processInput( GLFWwindow* window )
     if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
     {
         glfwSetWindowShouldClose( window, true );
+    }
+    else if ( glfwGetKey( window, GLFW_KEY_1 ) == GLFW_PRESS )
+    {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    }
+    else if ( glfwGetKey( window, GLFW_KEY_2 ) == GLFW_PRESS )
+    {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    } 
+    else if ( glfwGetKey( window, GLFW_KEY_3 ) == GLFW_PRESS )
+    {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
     }
 }
