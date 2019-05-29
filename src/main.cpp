@@ -14,20 +14,20 @@ const int SCREEN_HEIGHT = 600;
 // simple Vertex Shader source code
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout ( location = 0 ) in vec3 aPos;\n"
-                                 "out vec4 vertexColor;\n"
+                                 "layout ( location = 1 ) in vec3 aColor;\n"
+                                 "out vec3 ourColor;\n"
                                  "void main( )\n"
                                  "{\n"
                                  "      gl_Position = vec4( aPos.x, aPos.y, aPos.z, 1.0f );\n"
-                                 "      vertexColor = vec4( 0.5f, 0.0f, 0.0f, 1.0f );\n"
+                                 "      ourColor = aColor;\n"
                                  "}\n\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
                                    "out vec4 FragColor;\n"
-                                   "in vec4 vertexColor;"
-                                   "uniform vec4 ourColor;"
+                                   "in vec3 ourColor;"
                                    "void main( )\n"
                                    "{\n"
-                                   "      FragColor = ourColor;\n"
+                                   "      FragColor = vec4( ourColor, 1.0f );\n"
                                    "}\n\0";
 
 int main( )
@@ -89,14 +89,13 @@ int main( )
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
-         0.5f,  0.5f, 0.0f, // top right
-         0.5f, -0.5f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f  // top left
-    };
+        // positions        // colors
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,   // bottom left
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // top 
+    }; 
     unsigned int indices[] = {
-        0, 1, 3,    // first triangle
-        1, 2, 3     // second triangle
+        0, 1, 2    // first triangle
     };
 
     // generating a Vertex Array Object to store the states that were set
@@ -120,8 +119,10 @@ int main( )
     // copying the previously defined index data into the buffer's memory
     glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
     // teaching OpenGL how it should interpret the Vertex Data (fourth)
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0 );
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0 );
     glEnableVertexAttribArray( 0 );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray( 1 );
     // unbiding the current Vertex Buffer Object
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     // unbiding the current Vertex Array Object
@@ -148,8 +149,8 @@ int main( )
 
         // rendering triangle
         glBindVertexArray( VAO );
-        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glDrawArrays( GL_TRIANGLES, 0, 3 );
+        // glDrawElements( GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
         
         // check call events and swap buffer
         glfwSwapBuffers( window );
