@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "learnopengl-implementation/shader.h"
+
 void processInput( GLFWwindow* );
 void framebuffer_size_callback( GLFWwindow*, int, int );
 
@@ -11,27 +13,8 @@ void framebuffer_size_callback( GLFWwindow*, int, int );
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
-// simple Vertex Shader source code
-const char *vertexShaderSource = "#version 330 core\n"
-                                 "layout ( location = 0 ) in vec3 aPos;\n"
-                                 "layout ( location = 1 ) in vec3 aColor;\n"
-                                 "out vec3 ourColor;\n"
-                                 "void main( )\n"
-                                 "{\n"
-                                 "      gl_Position = vec4( aPos.x, aPos.y, aPos.z, 1.0f );\n"
-                                 "      ourColor = aColor;\n"
-                                 "}\n\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-                                   "out vec4 FragColor;\n"
-                                   "in vec3 ourColor;"
-                                   "void main( )\n"
-                                   "{\n"
-                                   "      FragColor = vec4( ourColor, 1.0f );\n"
-                                   "}\n\0";
-
 int main( )
-{
+{    
     // initialize GLFW
     glfwInit( );
     // configure OpenGL's minor and major versions to be 3.3
@@ -61,31 +44,8 @@ int main( )
         return -1;
     }
 
-    // creating a shader object to reference a vertex shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader( GL_VERTEX_SHADER );
-    // attaching the shader source code with the created shader object and compiling
-    glShaderSource( vertexShader, 1, &vertexShaderSource, NULL );
-    glCompileShader( vertexShader );
-
-    // creating a shader object to reference a fragment shader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
-    // attaching the shader source code with the created shader object and compiling
-    glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
-    glCompileShader( fragmentShader );
-
-    // creating the Shader Program
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram( );
-    // attaching previously compiled shaders to the Shader Program and linking them
-    glAttachShader( shaderProgram, vertexShader );
-    glAttachShader( shaderProgram, fragmentShader );
-    glLinkProgram( shaderProgram );    
-
-    // deleting created and now unnecessary shaders
-    glDeleteShader( vertexShader );
-    glDeleteShader( fragmentShader );   
+    // creating a shader object
+    Shader ourShader( "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.vs", "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.fs" );
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
@@ -139,13 +99,7 @@ int main( )
         glClear( GL_COLOR_BUFFER_BIT ); 
 
         // activating the Shader Program
-        glUseProgram( shaderProgram );
-
-        // updating uniform color
-        float timeValue = glfwGetTime( );
-        float blueValue = sin( timeValue ) / 2.0f + 0.5f;
-        int vertexColorLocation = glGetUniformLocation( shaderProgram, "ourColor" );
-        glUniform4f( vertexColorLocation, 0.0f, 0.0f, blueValue, 1.0f );
+        ourShader.use( );
 
         // rendering triangle
         glBindVertexArray( VAO );
