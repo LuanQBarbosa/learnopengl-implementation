@@ -98,6 +98,8 @@ int main( )
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
         glClear( GL_COLOR_BUFFER_BIT ); 
 
+        // changing uniform on the shader program
+        ourShader.setFloat( "hDesloc", 0.0f );
         // activating the Shader Program
         ourShader.use( );
 
