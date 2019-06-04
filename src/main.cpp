@@ -53,10 +53,28 @@ int main( )
          0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom right
         -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,   // bottom left
          0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // top 
-    }; 
+    };
     unsigned int indices[] = {
         0, 1, 2    // first triangle
     };
+
+    // texture coordinates
+    float texCoords[] = {
+        0.0f, 0.0f, //  lower-left corner
+        1.0f, 0.0f, //  lower-right corner
+        0.5f, 1.0f  //  top-center corner
+    };    
+
+    // setting texture wrap
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    // setting texture scaling
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    // setting texture border color
+    float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+    glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
 
     // generating a Vertex Array Object to store the states that were set
     unsigned int VAO;
