@@ -4,6 +4,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "learnopengl-implementation/shader.h"
 
 void processInput( GLFWwindow* );
@@ -71,10 +74,28 @@ int main( )
     // setting texture scaling
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // setting mipmap filtering method
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     // setting texture border color
     float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
     glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
+
+    // loading image
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load( "/home/ryuugami/Projects/C++/learnopengl-implementation/textures/container.jpg", 
+                                    &width, &height, &nrChannels, 0 );
+
+    if ( data )
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+    }
+    else
+    {
+        std::cerr << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free( data );
 
     // generating a Vertex Array Object to store the states that were set
     unsigned int VAO;
