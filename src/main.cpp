@@ -52,13 +52,15 @@ int main( )
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
-        // positions        // colors
-         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,   // bottom left
-         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // top 
+        // positions        // colors         // texture coords
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left 
+        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f    // top left
     };
     unsigned int indices[] = {
-        0, 1, 2    // first triangle
+        0, 1, 3,    // first triangle
+        1, 2, 3     // second triangle
     };
 
     // texture coordinates
@@ -66,36 +68,7 @@ int main( )
         0.0f, 0.0f, //  lower-left corner
         1.0f, 0.0f, //  lower-right corner
         0.5f, 1.0f  //  top-center corner
-    };    
-
-    // setting texture wrap
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
-    // setting texture scaling
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    // setting mipmap filtering method
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-    // setting texture border color
-    float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-    glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
-
-    // loading image
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load( "/home/ryuugami/Projects/C++/learnopengl-implementation/textures/container.jpg", 
-                                    &width, &height, &nrChannels, 0 );
-
-    if ( data )
-    {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-    }
-    else
-    {
-        std::cerr << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free( data );
+    };     
 
     // generating a Vertex Array Object to store the states that were set
     unsigned int VAO;
@@ -118,14 +91,48 @@ int main( )
     // copying the previously defined index data into the buffer's memory
     glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
     // teaching OpenGL how it should interpret the Vertex Data (fourth)
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0 );
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0 );
     glEnableVertexAttribArray( 0 );
-    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)) );
     glEnableVertexAttribArray( 1 );
+    glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6*sizeof(float)) );
+    glEnableVertexAttribArray( 2 );
     // unbiding the current Vertex Buffer Object
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    // unbiding the current Vertex Array Object
-    glBindVertexArray( 0 );
+
+    // creating and biding a texture
+    unsigned int texture;
+    glGenTextures( 1, &texture );
+    glBindTexture( GL_TEXTURE_2D, texture );
+    // setting texture wrap
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    // setting texture scaling
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // setting mipmap filtering method
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    // setting texture border color
+    float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+    glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
+
+    // loading image
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load( "/home/ryuugami/Projects/C++/learnopengl-implementation/textures/container.jpg", 
+                                    &width, &height, &nrChannels, 0 );
+
+    if ( data )
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cerr << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free( data );
 
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
@@ -135,15 +142,18 @@ int main( )
 
         // rendering commands
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
-        glClear( GL_COLOR_BUFFER_BIT ); 
+        glClear( GL_COLOR_BUFFER_BIT );
+
+        
 
         // activating the Shader Program
         ourShader.use( );
 
-        // rendering triangle
+        // rendering triangle             
         glBindVertexArray( VAO );
-        // glDrawElements( GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-        glDrawArrays( GL_TRIANGLES, 0, 3 );
+        glBindTexture( GL_TEXTURE_2D, texture ); 
+        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // glDrawArrays( GL_TRIANGLES, 0, 3 );
         
         // check call events and swap buffer
         glfwSwapBuffers( window );
