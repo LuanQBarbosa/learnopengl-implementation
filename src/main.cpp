@@ -56,7 +56,7 @@ int main( )
          0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
          0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
         -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left 
-        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f    // top left
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left
     };
     unsigned int indices[] = {
         0, 1, 3,    // first triangle
@@ -100,10 +100,48 @@ int main( )
     // unbiding the current Vertex Buffer Object
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
-    // creating and biding a texture
-    unsigned int texture;
-    glGenTextures( 1, &texture );
-    glBindTexture( GL_TEXTURE_2D, texture );
+    // creating and biding multiple textures
+    unsigned int texture1, texture2;
+    glGenTextures( 1, &texture1 );
+    glGenTextures( 1, &texture2 );
+
+    // activating the first texture unit to bind to it
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_2D, texture1 );
+    // setting texture wrap
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    // setting texture scaling
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // setting mipmap filtering method
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    // setting texture border color
+    float borderColor2[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+    glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor2 );
+
+    // loading image
+    int width2, height2, nrChannels2;
+    stbi_set_flip_vertically_on_load( true );
+    unsigned char *data2 = stbi_load( "/home/ryuugami/Projects/C++/learnopengl-implementation/textures/container.jpg", 
+                                    &width2, &height2, &nrChannels2, 0 );
+
+    if ( data2 )
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGB, GL_UNSIGNED_BYTE, data2 );
+        glGenerateMipmap( GL_TEXTURE_2D );
+    }
+    else
+    {
+        std::cerr << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free( data2 );
+
+    // activating the second texture unit to bind to it
+    glActiveTexture( GL_TEXTURE1 );
+    glBindTexture( GL_TEXTURE_2D, texture2 );
     // setting texture wrap
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
@@ -120,19 +158,24 @@ int main( )
 
     // loading image
     int width, height, nrChannels;
-    unsigned char *data = stbi_load( "/home/ryuugami/Projects/C++/learnopengl-implementation/textures/container.jpg", 
+    unsigned char *data = stbi_load( "/home/ryuugami/Projects/C++/learnopengl-implementation/textures/awesomeface.png", 
                                     &width, &height, &nrChannels, 0 );
 
     if ( data )
     {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+        glGenerateMipmap( GL_TEXTURE_2D );
     }
     else
     {
         std::cerr << "Failed to load texture" << std::endl;
     }
     stbi_image_free( data );
+
+    // telling to which texture unit each shader sampler belongs to
+    ourShader.use( );
+    glUniform1i( glGetUniformLocation( ourShader.ID, "texture1" ), 0 );
+    ourShader.setInt( "texture2", 1 );
 
     // initializing render loop
     while ( !glfwWindowShouldClose( window ) )
@@ -142,16 +185,19 @@ int main( )
 
         // rendering commands
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
-        glClear( GL_COLOR_BUFFER_BIT );
-
-        
+        glClear( GL_COLOR_BUFFER_BIT );        
 
         // activating the Shader Program
         ourShader.use( );
 
+        // activating and binding each texture unit
+        glActiveTexture( GL_TEXTURE0 );
+        glBindTexture( GL_TEXTURE_2D, texture1 );
+        glActiveTexture( GL_TEXTURE1 );
+        glBindTexture( GL_TEXTURE_2D, texture2 );
+
         // rendering triangle             
         glBindVertexArray( VAO );
-        glBindTexture( GL_TEXTURE_2D, texture ); 
         glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glDrawArrays( GL_TRIANGLES, 0, 3 );
         
