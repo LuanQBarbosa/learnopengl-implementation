@@ -15,6 +15,7 @@ void framebuffer_size_callback( GLFWwindow*, int, int );
 // settings
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
+float mixValue = 0.2f;
 
 int main( )
 {    
@@ -101,14 +102,14 @@ int main( )
     // activating the first texture unit to bind to it
     glBindTexture( GL_TEXTURE_2D, texture1 );
     // setting texture wrap
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     // setting texture scaling
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     // setting mipmap filtering method
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     // setting texture border color
     float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
@@ -138,10 +139,10 @@ int main( )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
     // setting texture scaling
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     // setting mipmap filtering method
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     // setting texture border color
     glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
@@ -178,6 +179,7 @@ int main( )
 
         // activating the Shader Program
         ourShader.use( );
+        ourShader.setFloat( "mixValue", mixValue );
 
         // activating and binding each texture unit
         glActiveTexture( GL_TEXTURE0 );
@@ -230,5 +232,17 @@ void processInput( GLFWwindow* window )
     else if ( glfwGetKey( window, GLFW_KEY_3 ) == GLFW_PRESS )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
+    }
+    else if ( glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS )
+    {
+        mixValue += 0.01f;
+        if ( mixValue >= 1.0f )
+            mixValue = 1.0f;
+    }
+    else if ( glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS )
+    {
+        mixValue -= 0.01f;
+        if ( mixValue <= 0.0f )
+            mixValue = 0.0f;
     }
 }
