@@ -49,16 +49,18 @@ int main( )
     }
 
     // creating a shader object
-    Shader ourShader( "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.vs", "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.fs" );
+    Shader ourShader( "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.vs", 
+                      "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.fs" );
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
-        // positions        // colors         // texture coords
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left 
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left
+        // positions            // colors           // texture coords
+         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   2.0f, 2.0f,   // top right
+         0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left 
+        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left
     };
+
     unsigned int indices[] = {
         0, 1, 3,    // first triangle
         1, 2, 3     // second triangle
@@ -83,7 +85,7 @@ int main( )
     // binding the newly generated Element Buffer Object with the GL_ELEMENT_ARRAY_BUFFER of OpenGL
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
     // copying the previously defined index data into the buffer's memory
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( indices ), indices, GL_STATIC_DRAW );
     // teaching OpenGL how it should interpret the Vertex Data (fourth)
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0 );
     glEnableVertexAttribArray( 0 );
