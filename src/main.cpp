@@ -15,6 +15,7 @@ void framebuffer_size_callback( GLFWwindow*, int, int );
 // settings
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
+float mixValue = 0.2f;
 
 int main( )
 {    
@@ -48,16 +49,18 @@ int main( )
     }
 
     // creating a shader object
-    Shader ourShader( "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.vs", "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.fs" );
+    Shader ourShader( "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.vs", 
+                      "/home/ryuugami/Projects/C++/learnopengl-implementation/src/shader.fs" );
 
     // triangle vertices in normalized device coordinates
     float vertices[] = {
-        // positions        // colors         // texture coords
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left 
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // top left
+        // positions            // colors           // texture coords
+         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   2.0f, 2.0f,   // top right
+         0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left 
+        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left
     };
+
     unsigned int indices[] = {
         0, 1, 3,    // first triangle
         1, 2, 3     // second triangle
@@ -82,7 +85,7 @@ int main( )
     // binding the newly generated Element Buffer Object with the GL_ELEMENT_ARRAY_BUFFER of OpenGL
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
     // copying the previously defined index data into the buffer's memory
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( indices ), indices, GL_STATIC_DRAW );
     // teaching OpenGL how it should interpret the Vertex Data (fourth)
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0 );
     glEnableVertexAttribArray( 0 );
@@ -101,14 +104,14 @@ int main( )
     // activating the first texture unit to bind to it
     glBindTexture( GL_TEXTURE_2D, texture1 );
     // setting texture wrap
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     // setting texture scaling
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     // setting mipmap filtering method
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     // setting texture border color
     float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
@@ -138,10 +141,10 @@ int main( )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
     // setting texture scaling
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     // setting mipmap filtering method
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     // setting texture border color
     glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
@@ -178,6 +181,7 @@ int main( )
 
         // activating the Shader Program
         ourShader.use( );
+        ourShader.setFloat( "mixValue", mixValue );
 
         // activating and binding each texture unit
         glActiveTexture( GL_TEXTURE0 );
@@ -230,5 +234,17 @@ void processInput( GLFWwindow* window )
     else if ( glfwGetKey( window, GLFW_KEY_3 ) == GLFW_PRESS )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
+    }
+    else if ( glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS )
+    {
+        mixValue += 0.01f;
+        if ( mixValue >= 1.0f )
+            mixValue = 1.0f;
+    }
+    else if ( glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS )
+    {
+        mixValue -= 0.01f;
+        if ( mixValue <= 0.0f )
+            mixValue = 0.0f;
     }
 }
