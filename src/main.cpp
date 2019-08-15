@@ -1,6 +1,10 @@
 #include <iostream>
 #include <cmath>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -55,10 +59,10 @@ int main( )
     // triangle vertices in normalized device coordinates
     float vertices[] = {
         // positions            // colors           // texture coords
-         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   2.0f, 2.0f,   // top right
-         0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // bottom right
+         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
         -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left 
-        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left
+        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {
@@ -189,10 +193,27 @@ int main( )
         glActiveTexture( GL_TEXTURE1 );
         glBindTexture( GL_TEXTURE_2D, texture2 );
 
+        // rotating our container each game loop
+        float time = (float)glfwGetTime( );
+        glm::mat4 transform = glm::mat4( 1.0f );
+        transform = glm::translate( transform, glm::vec3( 0.5f, -0.5f, 0.0f ) );
+        transform = glm::rotate( transform, time, glm::vec3( 0.0f, 0.0f, 1.0f ) );
+        
+        unsigned int transformLoc = glGetUniformLocation( ourShader.ID, "transform" );
+        glUniformMatrix4fv( transformLoc, 1, GL_FALSE, glm::value_ptr( transform ) );
+
         // rendering triangle             
         glBindVertexArray( VAO );
-        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
         // glDrawArrays( GL_TRIANGLES, 0, 3 );
+
+        // translating and scaling a second container
+        transform = glm::mat4( 1.0f );
+        transform = glm::translate( transform, glm::vec3( -0.5f, 0.5f, 0.0f ) );
+        transform = glm::scale( transform, glm::vec3( sin( time ), sin( time ), 0.0f ) );
+
+        glUniformMatrix4fv( transformLoc, 1, GL_FALSE, &transform[0][0] );
+        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
         
         // check call events and swap buffer
         glfwSwapBuffers( window );
@@ -237,13 +258,13 @@ void processInput( GLFWwindow* window )
     }
     else if ( glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS )
     {
-        mixValue += 0.01f;
+        mixValue += 0.0001f;
         if ( mixValue >= 1.0f )
             mixValue = 1.0f;
     }
     else if ( glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS )
     {
-        mixValue -= 0.01f;
+        mixValue -= 0.0001f;
         if ( mixValue <= 0.0f )
             mixValue = 0.0f;
     }
